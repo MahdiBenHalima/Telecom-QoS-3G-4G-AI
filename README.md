@@ -45,7 +45,13 @@ The example produces a **global score of 3.0**.
 
 ## 3G trained model
 
-The original 3G model is **not bundled with this initial public release**. The API reports model availability at GET / and returns HTTP 503 for 3G predictions when the model is absent. After verifying rights to redistribute the trained artifacts, place trusted `rf_3g_pipeline.joblib` and `label_encoder_3g.joblib` in `backend/models/`. Never deserialize untrusted joblib files.
+The 3G model artifacts are **not bundled in the public repository**. The API reports model availability at GET / and returns HTTP 503 for 3G predictions when artifacts are absent. You can recreate the original 3G Random Forest training process using an authorized local copy of the source `DT2.csv`:
+
+```bash
+python -m training.train_3g --data "path/to/DT2.csv" --output backend/models
+```
+
+This saves the fitted pipeline, class encoder and local `evaluation_3g.json`. See [Reproducibility and evaluation caveats](docs/REPRODUCIBILITY.md) and the [runnable notebook](notebooks/reproduce_3g_training.ipynb). No private source measurements or unverified real-data scores are published. Only deserialize model artifacts you trust.
 
 ## Tests
 
@@ -53,11 +59,11 @@ The original 3G model is **not bundled with this initial public release**. The A
 python -m pytest -q
 ```
 
-CI is configured under `.github/workflows/tests.yml`.
+CI is configured under `.github/workflows/tests.yml`; its actual status must be checked in the GitHub Actions tab.
 
 ## Data and methodology
 
-The original engineering project contains 3G and 4G measurement datasets, a training notebook and a Flutter mobile frontend. Raw datasets and the Flutter project are excluded from this recruiter-facing AI-only repository pending a publication review. Quality categories may be derived from KPI thresholds, so a model's predictive accuracy on these labels must not be confused with independent ground-truth network quality.
+The original engineering project contains 3G and 4G measurement datasets, a training notebook and a Flutter mobile frontend. Raw datasets and the Flutter project are excluded from this recruiter-facing AI-only repository pending a publication review. The 3G training reconstruction reproduces the core scikit-learn baseline comparison and final Random Forest export; optional XGBoost from the original notebook is not included. Quality categories may be derived from KPI thresholds, so a model's predictive accuracy on these labels must not be confused with independent ground-truth network quality.
 
 ## Stack
 
