@@ -1,7 +1,37 @@
-# Python
-__pycache__/
-.pytest_cache/
-.venv/
+# Python environments and caches
+**/.venv/
+**/venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ipynb_checkpoints/
+**/.idea/
+*.py[cod]
+
+# Credentials and local configuration
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+*credentials*.json
+*service-account*.json
+
+# Local private measurements and ML artifacts
 *.csv
 *.xlsx
+*.xls
+*.joblib
+*.pkl
+evaluation_3g.json
+**/models/
+
+# Archives, logs and generated application files
+*.zip
+*.7z
+*.tar.gz
+*.log
+**/build/
+**/.dart_tool/
+**/.gradle/
