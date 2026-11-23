@@ -1,142 +1,188 @@
-# Telecom QoS 3G/4G — Machine Learning & Network Quality Assessment
+# Telecom QoS Intelligence — 3G Machine Learning & 4G Network Quality Assessment
 
-**Telecommunications Engineering · Radio KPI Analysis · Machine Learning · FastAPI**
+**Radio Network Analytics · Supervised Machine Learning · KPI-Based Scoring · FastAPI**
 
 [![Validate Telecom QoS AI](https://github.com/MahdiBenHalima/Telecom-QoS-3G-4G-AI/actions/workflows/tests.yml/badge.svg)](https://github.com/MahdiBenHalima/Telecom-QoS-3G-4G-AI/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn&logoColor=white)
+![API](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
+![Domain](https://img.shields.io/badge/Domain-3G%20%2F%204G%20QoS-273C75)
 
-This repository documents the **AI and network-quality analysis components** of an academic telecommunications engineering project developed to assess 3G/4G radio quality from measured network performance indicators (KPIs).
+A telecommunications engineering project for **assessing mobile network quality from radio measurements**. It combines a **Random Forest-based 3G classification workflow**, a transparent **4G KPI scoring engine**, and a **FastAPI inference service** with explainable results.
 
-The original project includes network measurement preprocessing, a 3G supervised-learning experiment, a 4G KPI-based quality scoring system, a FastAPI service, a rule-based diagnostic assistant, and a Flutter mobile application. This **public AI-focused repository** preserves the key prediction logic, provides a source-derived 3G experiment reconstruction, and adds privacy-safe validation tests. Original measurement files, serialized fitted models, and the full mobile application are not distributed here.
+The system was developed as an academic project with a mobile-facing application. This public repository presents the **ML, radio-analysis and backend components** as a reproducible engineering portfolio, using fabricated test records instead of distributing original measurement datasets.
 
-> **Scope:** Research/engineering demonstration. Scores are not verified operator service-level assessments. The 3G prediction target is *derived from input radio KPIs*, rather than independently measured quality-of-experience labels. The 4G component is a deterministic scoring system—not an ML-trained 4G predictor. The assistant uses predefined rules, not an LLM or RAG.
+## At a glance
 
-## Key components
-
-| Component | Public implementation | What it demonstrates |
+| 3G quality classification | 4G network assessment | API & decision explanations |
 | --- | --- | --- |
-| 3G original feature schema | [`training/train_3g.py`](training/train_3g.py) | Seven named input features from the original training notebook |
-| 3G data preprocessing and labeling | [`training/train_3g.py`](training/train_3g.py) | Parsing, normalization, missing-value handling, RSCP/Ec/N0 category construction |
-| 3G ML training and evaluation | [`training/train_3g.py`](training/train_3g.py) | Stratified 80/20 split; Logistic Regression, Decision Tree, Random Forest; accuracy and weighted F1 |
-| Reproducible notebook | [`notebooks/reproduce_3g_training.ipynb`](notebooks/reproduce_3g_training.ipynb) | Rebuild the experiment locally using authorized data; no bundled operator records |
-| 3G prediction interface | [`backend/services/predictor_3g.py`](backend/services/predictor_3g.py) | Construct pandas feature input and call locally loaded Random Forest pipeline |
-| 4G QoS scoring | [`backend/services/predictor_4g.py`](backend/services/predictor_4g.py) | RSRP, RSRQ and downlink throughput classification and weighted decision |
-| FastAPI inference service | [`backend/main.py`](backend/main.py) | HTTP endpoints for network prediction, health and technical questions |
-| Rule-based technical assistant | [`backend/services/chat_service.py`](backend/services/chat_service.py) | Identify degraded KPI and explain a decision with deterministic rules |
-| Tests and CI | [`tests/`](tests/), [GitHub Actions](.github/workflows/tests.yml) | Source-level behavior, API input contracts, and training on fabricated records |
-| Traceability and limitations | [`TRACEABILITY.md`](TRACEABILITY.md), [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) | Clearly distinguish historical source, reconstructed methods and synthetic tests |
+| Supervised ML on seven radio features | Weighted RSRP, RSRQ and downlink-throughput scores | REST inference endpoints and deterministic diagnostic assistant |
+| Random Forest with Logistic Regression and Decision Tree comparisons | Explicit 30% / 30% / 40% weighting | FastAPI, Pydantic, unit/API tests and GitHub Actions |
+| Reproducible preprocessing, training and model export | No model training required for 4G scoring | The original application also included a Flutter client |
 
-## Project architecture
+## Engineering problem
 
-```text
-      3G/4G radio measurements — private source datasets
-                            |
-                    KPI preprocessing
-                            |
-             +--------------+---------------+
-             |                              |
-             v                              v
-  3G: RSCP / Ec/N0 + parameters    4G: RSRP / RSRQ / throughput
-             |                              |
-  Derived quality labels                     |
-             |                              |
-  Supervised model experiments       KPI class thresholds
-  LR / Decision Tree / RF                      |
-             |                      Weighted 30% / 30% / 40%
-  Trained 3G Random Forest                     |
-             |                              |
-             +--------------+---------------+
-                            |
-                    FastAPI /predict
-                            |
-                  KPI explanation module
-                            |
-             Rule-based /chat assistant
-                            |
-              Original Flutter application
-                 (not in public release)
+Mobile-network measurements include many radio indicators, but individual KPI values are not always easy to interpret. This project turns selected **3G and 4G radio measurements** into a consistent, inspectable quality assessment to support technical interpretation.
+
+The two networks use different methods:
+
+- **3G:** a supervised classifier learns to reproduce QoS categories **derived from RSCP and Ec/N0 thresholds**.
+- **4G:** a deterministic scoring policy combines **RSRP, RSRQ and downlink throughput**.
+
+The output is an interpretable connection recommendation with supporting KPI classifications. The result represents the project's engineering assessment rules, **not an independently validated subscriber Quality of Experience (QoE) or operator SLA**.
+
+## System architecture
+
+```mermaid
+flowchart TD
+    A["3G / 4G radio KPI measurements"] --> B["Data preparation and validation"]
+    B --> C{"Network technology"}
+    C -->|3G| D["RSCP and Ec/N0 labeling policy"]
+    D --> E["Model training and comparison"]
+    E --> F["Random Forest pipeline + label encoder"]
+    F --> G["3G classification inference"]
+    C -->|4G| H["RSRP / RSRQ / DL throughput classes"]
+    H --> I["Weighted 4G quality score"]
+    G --> J["FastAPI /predict"]
+    I --> J
+    J --> K["KPI interpretation and explanation"]
+    K --> L["Rule-based /chat assistant"]
+    J --> M["Original mobile integration (private)"]
+    L --> M
 ```
 
-The public API can serve 4G quality scoring without any model weights. For 3G inference, it requires an authorized, locally reconstructed/trusted trained pipeline and target-label encoder.
+The 3G model artifacts are generated locally from an authorized dataset; they are **not bundled** in this repository. The **4G API works without any trained model**.
 
-## Network KPIs and assessment logic
+## 1. 3G — Machine learning pipeline
 
-### 3G — KPI-derived classification with Random Forest
+### Input features
 
-The original notebook engineers a target class from **RSCP** (signal strength) and **Ec/N0** (signal quality), then trains classifiers to approximate that labeling scheme. Seven inputs are used for the ML model:
+The reconstructed training pipeline uses the following **seven radio features** from the original training schema:
 
-| Ordered feature | Meaning |
+| Feature | Description |
 | --- | --- |
 | `band_active` | Active 3G frequency band |
 | `channel_active` | Active channel number |
 | `scrambling_active` | Active scrambling code |
-| `rscp_active` | Active RSCP signal power |
-| `ecno_active` | Active Ec/N0 signal quality |
-| `rscp_detected` | Detected-cell RSCP |
-| `scrambling_detected` | Detected scrambling code |
+| `rscp_active` | Received signal code power (active cell) |
+| `ecno_active` | Energy-per-chip to noise density ratio |
+| `rscp_detected` | RSCP of a detected cell |
+| `scrambling_detected` | Detected-cell scrambling code |
 
-The quality policy scores RSCP and Ec/N0 separately from 1 to 4, then calculates:
+### Feature engineering and quality labels
+
+The original procedure scores the two core KPIs separately and combines them:
 
 ```text
-3G global score = 0.50 × RSCP score + 0.50 × Ec/N0 score
+3G QoS score = 0.50 × RSCP class score + 0.50 × Ec/N0 class score
 ```
 
-The original decision bands are:
-
-| 3G score | Engineered decision |
+| Composite score | Derived connection category |
 | --- | --- |
-| 3.2 or above | Connexion recommandée |
-| 2.2 to below 3.2 | Connexion possible mais instable |
-| Below 2.2 | Connexion faible / non recommandée |
+| ≥ 3.2 | Connexion recommandée |
+| ≥ 2.2 and < 3.2 | Connexion possible mais instable |
+| < 2.2 | Connexion faible / non recommandée |
 
-**Important:** The ML model is trained on these engineered labels. Its holdout accuracy measures reproduction of the chosen scoring policy, **not independent real-world quality or user experience**.
+These classes are **engineered targets based on the input KPIs**, not independent ground-truth measurements of customer experience. Classification metrics therefore describe agreement with the labeling policy.
 
-### 4G — Transparent weighted KPI scoring
+### Training and model comparison
 
-The 4G module classifies three radio indicators, converts classes into ordinal scores, and produces:
+The public training reconstruction includes:
 
-```text
-4G global score =
-    0.30 × RSRP class score
-  + 0.30 × RSRQ class score
-  + 0.40 × downlink throughput class score
-```
+1. Parsing the original-style, semicolon-separated 3G measurement format.
+2. Cleaning fields, normalizing numeric values and removing invalid core KPI records.
+3. Engineering the RSCP/Ec/N0-based classification target.
+4. Preprocessing with `ColumnTransformer`, imputation, scaling and one-hot encoding.
+5. A **stratified 80/20 train–test split** with random seed `42`.
+6. Comparing **Logistic Regression, Decision Tree and Random Forest** using accuracy and weighted F1.
+7. Fitting the final **Random Forest with 200 estimators and balanced class weights** on the filtered dataset for local export.
+
+**Implementation:** [`training/train_3g.py`](training/train_3g.py) · [Reproduction notebook](notebooks/reproduce_3g_training.ipynb)
+
+### Experiment evidence
+
+| Experiment setting | Value verified in source |
+| --- | --- |
+| Feature count | 7 |
+| Target | Three QoS categories derived from RSCP and Ec/N0 |
+| Evaluation split | 80% train / 20% test, stratified |
+| Baselines | Logistic Regression, Decision Tree |
+| Exported model | Random Forest, 200 trees, `class_weight="balanced"` |
+| Evaluation metrics produced by training | Accuracy, weighted F1 |
+| Published real-dataset test metrics | **Not included**; cannot be verified without the authorized source dataset |
+
+Running the reconstruction with permitted data writes `evaluation_3g.json`, including the local results. No synthetic-test accuracy is presented here as a real-world network-performance metric.
+
+## 2. 4G — KPI-based network quality scoring
+
+The 4G analysis uses three radio indicators. Their categories are converted into ordinal scores and aggregated with the following explicit weights:
 
 | KPI | Weight | Role |
 | --- | ---: | --- |
-| RSRP | 30% | Received reference-signal power |
-| RSRQ | 30% | Reference-signal quality |
-| Download throughput | 40% | Downlink data rate |
+| **RSRP** | **30%** | Received reference signal power |
+| **RSRQ** | **30%** | Reference signal quality |
+| **Downlink throughput** | **40%** | Download performance |
 
-4G decision thresholds:
+```text
+4G QoS score = 0.30 × RSRP score
+             + 0.30 × RSRQ score
+             + 0.40 × Downlink throughput score
+```
 
-| 4G score | Decision |
+| Global score | Connection recommendation |
 | --- | --- |
-| 3.5 or above | Connexion recommandée |
-| 2.3 to below 3.5 | Connexion possible mais instable |
-| Below 2.3 | Connexion faible / non recommandée |
+| ≥ 3.5 | Connexion recommandée |
+| ≥ 2.3 and < 3.5 | Connexion possible mais instable |
+| < 2.3 | Connexion faible / non recommandée |
 
-For the demonstration input **RSRP = −86, RSRQ = −9, throughput = 22**, the implemented scoring rules return **3.0**, resulting in *Connexion possible mais instable*. This is a **calculated example**, not an operator measurement or statistical performance claim.
+### Reproducible 4G example
 
-## Source experiment vs public reconstruction
+<details>
+<summary><strong>Example input and calculated result</strong></summary>
 
-The original private notebook `ai/sample.ipynb` includes preprocessing, KPI scoring, labeling, a stratified holdout experiment and model export. The public [`training/train_3g.py`](training/train_3g.py) reconstructs the core training flow:
+```json
+{
+  "network_type": "4G",
+  "rsrp": -86,
+  "rsrq": -9,
+  "throughput_dl": 22
+}
+```
 
-1. Read original-style semicolon-delimited `DT2.csv` data from an authorized local path.
-2. Normalize raw column names and keep the first value of comma-separated fields.
-3. Convert numeric parameters; remove records missing valid time, RSCP or Ec/N0.
-4. Build the three 3G decision categories from fixed RSCP/Ec/N0 score thresholds.
-5. Encode the target using `LabelEncoder`; split 80/20 with stratification and seed 42.
-6. Use `ColumnTransformer` and `Pipeline` for numeric imputation/scaling and categorical one-hot encoding.
-7. Compare Logistic Regression, Decision Tree and Random Forest on the held-out split.
-8. Fit a final Random Forest (**200 trees**, balanced class weighting, seed 42) on all filtered samples and save model artifacts.
+The implemented classification rules produce:
 
-The original notebook optionally includes **XGBoost when installed**. It is intentionally not asserted that the portable public baseline fully reproduces all historical experiment runs, all versions of preprocessing, or the actual private model's numeric scores. The public model reconstruction is designed to make the **software workflow reviewable and repeatable**, given permission to use the source data.
+| KPI | Class | Score |
+| --- | --- | ---: |
+| RSRP = −86 | Bonne | 3 |
+| RSRQ = −9 | Acceptable | 3 |
+| Throughput = 22 | Assez bien | 3 |
 
-For the provenance mapping and exact scope, see [TRACEABILITY.md](TRACEABILITY.md). For methodological details see [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
+```text
+Global score = 0.30 × 3 + 0.30 × 3 + 0.40 × 3 = 3.0
+Decision     = Connexion possible mais instable
+```
 
-## Run the public API locally
+</details>
 
-Python **3.11** is used in GitHub Actions.
+This is a **deterministic calculation**, not an ML prediction or result measured from a live operator network.
+
+**Implementation:** [`backend/services/predictor_4g.py`](backend/services/predictor_4g.py)
+
+## 3. FastAPI — Inference and explanations
+
+The backend exposes inference and technical explanation services through FastAPI.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/` | API status and 3G model availability |
+| `POST` | `/predict` | 3G Random Forest inference or 4G KPI scoring |
+| `POST` | `/chat` | Rule-based explanation of radio quality and weak KPIs |
+
+The diagnostic assistant relies on predefined technical rules and **does not use an LLM or RAG**.
+
+### Run locally
+
+**Requirements:** Python 3.11 recommended.
 
 ```bash
 git clone https://github.com/MahdiBenHalima/Telecom-QoS-3G-4G-AI.git
@@ -146,72 +192,37 @@ python -m venv .venv
 
 Activate the environment:
 
-```bash
-# Linux / macOS
-source .venv/bin/activate
-
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-```
-
-Install dependencies and start the API:
+- **Windows PowerShell:** `.venv\Scripts\Activate.ps1`
+- **Linux/macOS:** `source .venv/bin/activate`
 
 ```bash
 python -m pip install -r requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-Open **http://127.0.0.1:8000/docs** for the interactive FastAPI interface.
+Open **http://127.0.0.1:8000/docs** to explore the API interactively.
 
-### Example: 4G prediction
+### Example: 4G API request
 
 ```bash
-curl -X POST http://127.0.0.1:8000/predict \
+curl -X POST "http://127.0.0.1:8000/predict" \
   -H "Content-Type: application/json" \
   -d '{"network_type":"4G","rsrp":-86,"rsrq":-9,"throughput_dl":22}'
 ```
 
-Expected decision and example global score:
+The response includes KPI classes, individual scores, a global score of **3.0**, a connection recommendation and a generated explanation. Additional optional fields include zone and frequency band information.
 
-```json
-{
-  "network_type": "4G",
-  "classes": {
-    "rsrp_class": "Bonne",
-    "rsrq_class": "Acceptable",
-    "throughput_class": "Assez bien"
-  },
-  "scores": {
-    "rsrp_score": 3,
-    "rsrq_score": 3,
-    "throughput_score": 3,
-    "global_score": 3.0
-  },
-  "decision_finale": "Connexion possible mais instable"
-}
-```
+> **3G inference:** `/predict` returns HTTP `503` when local trained model artifacts are unavailable. Train and export the pipeline before using 3G inference.
 
-The actual API response includes additional fields such as `input`, `zone`, `band` and `explication`.
+### Reproduce the 3G training
 
-### Example: rule-based diagnostic assistant
-
-```bash
-curl -X POST http://127.0.0.1:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"network_type":"4G","question":"Quel KPI est critique ?","decision_finale":"Connexion faible / non recommandée","classes":{"rsrp_class":"Mauvaise","rsrq_class":"Acceptable","throughput_class":"Très faible"}}'
-```
-
-This module uses deterministic logic to identify a weak KPI. It is **not** a large language model, multi-agent pipeline, or retrieval-augmented system.
-
-## Reproduce the 3G training experiment
-
-The original 3G measurement file is **not included** in the public repository. With a legitimate, locally accessible `DT2.csv` dataset in the expected original column format:
+With an **authorized local copy** of the original-style `DT2.csv`:
 
 ```bash
 python -m training.train_3g --data "/path/to/authorized/DT2.csv" --output backend/models
 ```
 
-This locally creates:
+The command exports:
 
 ```text
 backend/models/
@@ -220,66 +231,74 @@ backend/models/
 └── evaluation_3g.json
 ```
 
-These outputs are ignored by Git to help prevent accidental release. Restart the API after fitting so it can load the trusted artifacts at startup. The `/predict` 3G route returns **HTTP 503** if the 3G model is not available.
+Do not load untrusted `joblib`/pickle files; deserializing them can execute arbitrary code.
 
-The [Jupyter notebook](notebooks/reproduce_3g_training.ipynb) provides the same local entry point. The repository does not distribute precomputed private-data metrics.
+## 4. Verification and engineering quality
 
-**Security:** `joblib`/pickle deserialization can execute code; load only files you created yourself or otherwise trust.
+The public repository includes automated tests and an operational GitHub Actions workflow.
 
-## Tests and validation
+| Validation area | What the tests check |
+| --- | --- |
+| **3G data & ML** | KPI-derived label boundaries, source-format processing, synthetic training and artifact export |
+| **4G assessment** | KPI categorization, weighted scoring and decision thresholds |
+| **FastAPI** | Prediction contract, required input validation and response behavior |
+| **Diagnostic assistant** | Deterministic KPI explanation logic |
+| **CI** | Dependency installation and `pytest` on Python 3.11 |
 
 ```bash
 python -m pytest -q
 ```
 
-| Test scope | What is checked |
+[View GitHub Actions](https://github.com/MahdiBenHalima/Telecom-QoS-3G-4G-AI/actions) · [Methodology and reproducibility](docs/REPRODUCIBILITY.md)
+
+**Validation scope:** These checks use fabricated input records and verify the software's behavior. They are not evidence of generalization across real cells, field conditions or independent QoE labels.
+
+## 5. Project structure
+
+```text
+Telecom-QoS-3G-4G-AI/
+├── backend/
+│   ├── core/model_loader.py
+│   ├── schemas/
+│   ├── services/
+│   │   ├── predictor_3g.py
+│   │   ├── predictor_4g.py
+│   │   ├── explanation_service.py
+│   │   └── chat_service.py
+│   └── main.py
+├── training/train_3g.py
+├── notebooks/reproduce_3g_training.ipynb
+├── tests/
+├── docs/
+│   ├── REPRODUCIBILITY.md
+│   └── SECURITY_AND_DATA.md
+├── .github/workflows/tests.yml
+├── TRACEABILITY.md
+├── requirements.txt
+└── README.md
+```
+
+## 6. Technology stack
+
+| Area | Technologies |
 | --- | --- |
-| 4G deterministic scoring | KPI class maps, weighted score and connection decision on fabricated inputs |
-| 3G training logic | Derived-label boundaries, private-source-format parsing and synthetic training/export |
-| HTTP contract | FastAPI health, 4G /predict, missing-field rejection and /chat behavior |
-| Workflow | GitHub Actions installs dependencies and runs pytest on commits and pull requests |
+| **Machine learning** | Python, pandas, NumPy, scikit-learn, Random Forest, Logistic Regression, Decision Tree |
+| **Model engineering** | ColumnTransformer, Pipeline, LabelEncoder, joblib |
+| **API services** | FastAPI, Pydantic, Uvicorn |
+| **Validation and reproducibility** | pytest, GitHub Actions, Jupyter Notebook |
+| **Telecom** | 3G RSCP / Ec/N0; 4G RSRP / RSRQ / downlink throughput |
+| **Full original application** | Flutter mobile integration (not part of this public AI repository) |
 
-The test dataset is **fabricated within the tests**; it contains no samples copied from the original measurement datasets. The GitHub Actions badge reflects the workflow state as reported by GitHub. CI passing validates these engineering checks—not real-operator generalization or the entire private Flutter app.
+## 7. Public release and technical boundaries
 
-**Not validated by the public suite:** real-world QoE, independent ground-truth labels, calibration, cross-cell transfer, chronological robustness, deployed API security, mobile end-to-end integration and operator SLA compliance.
+This repository presents the **AI and radio-quality assessment work** from a larger academic project. Original measurement datasets, trained model artifacts, local configurations and the Flutter application are not distributed here.
 
-## Repositories: public AI portfolio vs full project
+The 3G model learns **labels derived from its input KPIs**, so conventional classification metrics must not be interpreted as independently validated service quality. The 4G module is a **weighted engineering score**, not a trained 4G model. The assistant is **rule-based**, not generative AI.
 
-| Public AI repository | Original full project (private) |
-| --- | --- |
-| 3G training reconstruction and reproducible notebook | Source measurement files and original research notebook |
-| True 3G inference input logic, model loading interface | Historical serialized model artifacts and original application configuration |
-| 4G KPI scoring engine | Original 4G measurements and full workflows |
-| FastAPI inference and rule-based chat | Flutter application, local project configuration and integration |
-| Source traceability and fabricated-data tests | Data requiring provenance and sharing review |
-
-These projects are intentionally separated to make AI engineering reviewable without distributing the private measurements or application.
-
-## Data provenance, limitations and responsible use
-
-- No original 3G/4G raw or processed measurement spreadsheets are included.
-- No private original fitted model weights or mobile application code are distributed.
-- No confidential credentials, external service tokens or logs should be committed.
-- The 3G labels come from RSCP and Ec/N0 thresholds. **Holdout classification metrics are not independent network-quality measurements.**
-- A random split of related network measurements may overestimate generalization if nearby measurements or cell identifiers occur in train and test; grouped/time-aware validation should be performed for future work.
-- The 4G score is a hand-designed weighted rubric, not a learned predictor, calibrated probability or physical model.
-- The API is a local engineering demo; public hosting would require authentication, rate limiting and additional security controls.
-- No measured test-set accuracy, F1 or live-network effectiveness is claimed in this README.
-
-See [Data and security notes](docs/SECURITY_AND_DATA.md) for further precautions.
-
-## Technology stack
-
-**Machine learning:** Python · pandas · NumPy · scikit-learn · Random Forest · Logistic Regression · Decision Tree
-
-**Software engineering:** FastAPI · Pydantic · joblib · pytest · GitHub Actions · Jupyter Notebook
-
-**Domain:** 3G/4G radio KPIs · RSCP · Ec/N0 · RSRP · RSRQ · throughput · network quality scoring
-
-**Original full-project integration (private):** Flutter mobile application.
+Reliable use in an operator environment would additionally require independent QoE ground truth, cell- or time-aware evaluation, monitoring, security review and appropriate calibration. See [data and security considerations](docs/SECURITY_AND_DATA.md) and [source traceability](TRACEABILITY.md).
 
 ---
 
-**Author:** Mahdi Ben Halima · ENET'Com — Telecommunications Engineering
+**Author:** [Mahdi Ben Halima](https://github.com/MahdiBenHalima) · ENET'Com — Telecommunications Engineering
 
-**Focus:** Applied Machine Learning · Radio KPI Analysis · Model Integration · Reproducible ML Research · FastAPI
+**Focus:** Applied Machine Learning · Mobile Network KPIs · Radio Quality Assessment · Model Deployment · Reproducible Engineering
