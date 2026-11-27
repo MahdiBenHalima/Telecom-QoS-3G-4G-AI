@@ -31,6 +31,16 @@ The two networks use different methods:
 
 The output is an interpretable connection recommendation with supporting KPI classifications. The result represents the project's engineering assessment rules, **not an independently validated subscriber Quality of Experience (QoE) or operator SLA**.
 
+## My technical contributions
+
+- Developed radio KPI preparation and quality-label engineering for 3G measurements.
+- Compared supervised classifiers and integrated a Random Forest inference pipeline.
+- Implemented an interpretable 4G quality assessment based on RSRP, RSRQ and downlink throughput.
+- Integrated network assessment and deterministic diagnostic explanations through FastAPI for a mobile-facing workflow.
+- Documented an independently reproducible training workflow, model artifact contract and automated validation in the public repository.
+
+The project addresses **current-measurement quality classification and scoring**, not forecasting future radio resource utilization or network traffic.
+
 ## System architecture
 
 ```mermaid
@@ -289,7 +299,20 @@ Telecom-QoS-3G-4G-AI/
 | **Telecom** | 3G RSCP / Ec/N0; 4G RSRP / RSRQ / downlink throughput |
 | **Full original application** | Flutter mobile integration (not part of this public AI repository) |
 
-## 7. Public release and technical boundaries
+## 7. Evaluation methodology and engineering limitations
+
+| Evaluation dimension | Recommended measurement | Public validation scope |
+| --- | --- | --- |
+| 3G classification | Accuracy, weighted F1, per-class recall and confusion matrix | Training script reports accuracy and weighted F1 |
+| Label-policy agreement | Agreement with engineered RSCP/Ec/N0 classes | Fabricated records and label-boundary tests |
+| 4G scoring | Boundary correctness and score consistency | Deterministic unit and API tests |
+| Generalization | Held-out cells, routes or time periods | Not established on real network data |
+| Subscriber QoE | Independent service-quality measurements | No independent ground truth supplied |
+| Runtime | Latency, throughput and error rates | No production benchmark claimed |
+
+For a stronger future experiment, compare Random Forest against the deterministic labeling policy and simpler classifiers. Use cell-aware or chronological holdouts to detect spatial and temporal leakage, inspect class imbalance and report uncertainty. Because RSCP and Ec/N0 are both input features and sources of the engineered target, high classification performance alone does not establish an ability to predict independent QoE.
+
+## 8. Public release and technical boundaries
 
 This repository presents the **AI and radio-quality assessment work** from a larger academic project. Original measurement datasets, trained model artifacts, local configurations and the Flutter application are not distributed here.
 
